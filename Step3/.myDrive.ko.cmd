@@ -1,0 +1,1 @@
+cmd_/home/huieric/Document/OS-project/Step3/myDrive.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/huieric/Document/OS-project/Step3/myDrive.ko /home/huieric/Document/OS-project/Step3/myDrive.o /home/huieric/Document/OS-project/Step3/myDrive.mod.o ;  true
