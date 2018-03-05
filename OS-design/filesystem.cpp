@@ -12,7 +12,16 @@ FileSystem::FileSystem() :
         printf("Filesystem first opened\n");
         for(int i=0;i<bit_map_size;++i)
             bitmapStartAddr[i]='0';
-        iTbl.num=0;
+        printf("Creating root directory...\n");
+        iNode& inode=iTbl.i[iTbl.num++];
+        inode.i_uid=0;
+        inode.i_type=Dir;
+        strcpy(inode.i_mode,"rwxr--r--");
+        inode.i_ilink=1;
+        inode.i_size=0;
+        curDir=rootDir=&inode;
+        strcpy(path, "/");
+        printf("done\n");
     }
     else
     {
@@ -21,7 +30,7 @@ FileSystem::FileSystem() :
         for(int i=0;i<iTbl.num;++i)
         {
             iNode &inode=iTbl.i[i];
-            fscanf(fs, "%d%d%s%d%ld", &inode.i_uid, &inode.i_type, inode.i_mode, &inode.i_ilink, &inode.i_size);
+            fscanf(fs, "%hd%hd%s%hd%ld", &inode.i_uid, &inode.i_type, inode.i_mode, &inode.i_ilink, &inode.i_size);
             for(int j=0;j<8;++j) fscanf(fs,"%d", &inode.i_addr[j]);
         }
         long skip=1+(sizeof(iNode)+6)*(block_num-iTbl.num);
@@ -33,8 +42,11 @@ FileSystem::FileSystem() :
         }
 
         fread(blockStartAddr, block_size, block_num, fs);
+        fclose(fs);
+
+        curDir=rootDir=&iTbl.i[0];
+        strcpy(path, "/");
     }
-    fclose(fs);
 }
 
 FileSystem::~FileSystem()
@@ -45,17 +57,17 @@ FileSystem::~FileSystem()
     for(int i=0;i<block_num;++i)
     {
         iNode &inode=iTbl.i[i];
-        fprintf(fs, "%d %d %s %d %ld ", inode.i_uid, inode.i_type, inode.i_mode, inode.i_ilink, inode.i_size);
+        fprintf(fs, "%hd %hd %s %hd %ld ", inode.i_uid, inode.i_type, inode.i_mode, inode.i_ilink, inode.i_size);
         for(int j=0;j<8;++j) fprintf(fs, "%d ", inode.i_addr[j]);
     }
     for(int i=0;i<bit_map_size;++i)
     {
-        fprintf(fs,"%c",bitmapStartAddr+i);
+        fprintf(fs,"%c",bitmapStartAddr[i]);
     }
     fwrite(blockStartAddr, block_size, block_num, fs);
     fclose(fs);
     printf("done\n");
-    printf("Filesystem closed\n";);
+    printf("Filesystem closed\n");
     free(systemStartAddr);
 }
 
@@ -118,7 +130,13 @@ int FileSystem::deleteFile(const char *fileName)
 
 int FileSystem::createDir(const char *dirName)
 {
-
+    iNode& inode=iTbl.i[iTbl.num++];
+    inode.i_uid=0;
+    inode.i_type=Dir;
+    strcpy(inode.i_mode, "rwxr--r--");
+    inode.i_ilink=1;
+    inode.i_size=0;
+    dirEntry* pe=(dirEntry*)getBlockAddr(curDir->i_addr[])
 }
 
 int FileSystem::deleteDir(const char *dirName)
@@ -128,7 +146,43 @@ int FileSystem::deleteDir(const char *dirName)
 
 int FileSystem::changeDir(const char *dirName)
 {
-
+    char* p=dirName, p1;
+    bool found, nonexist;
+    found=nonexist=false;
+    if(dirName[0]=='.')
+    {
+        p+=2;
+LABEL1:
+        p1=strchr(p, '/');
+        if(p1==0)
+        {
+            p1=dirName+strlen(dirName);
+        }
+        for(int i=0;i<8;++i)
+        {
+           dirEntry* pe=(dirEntry*)getBlockAddr(curDir->i_addr[i]);
+           for(int j=0;j<32;++j)
+           {
+                if(pe->inode_num==0) return -1;
+                if(strncmp(pe->fileName, p, p1-p)==0)
+                {
+                    curDir=&iTbl.i[pe->inode_num];
+                    p=*p1? p1+1 : p1;
+                    if(*p=='\0')
+                    {
+                        return 0;
+                    }
+                    goto LABEL1;
+                }
+           }
+        }
+    }
+    else
+    {
+        curDir=rootDir;
+        p++;
+        goto LABEL1;
+    }
 }
 
 int FileSystem::changeName(const char *oldName, const char *newName)

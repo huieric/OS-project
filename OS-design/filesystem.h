@@ -7,10 +7,10 @@
 
 typedef struct
 {
-    char i_uid;
-    char i_type;
+    short i_uid;
+    short i_type;
     char i_mode[9];
-    char i_ilink;
+    short i_ilink;
     long i_size;
     int i_addr[8];
 }iNode;
@@ -24,18 +24,28 @@ const int fs_size = max_file_size + bit_map_size;
 typedef struct
 {
     int num;
-    iNode i[block_num];
+    iNode i[100];
 }iNodeTable;
+
+typedef struct
+{
+    short inode_num;
+    char fileName[14];
+}dirEntry;
 
 class FileSystem
 {
 private:
     char *const systemStartAddr;
     char *const bitmapStartAddr;
-    char *const blockStartAddr;
-    iNodeTable iTbl;
+    char *const blockStartAddr;        
 
 public:
+    iNodeTable iTbl;
+    iNode* rootDir;
+    iNode* curDir;
+    char path[200];
+
     FileSystem();
     virtual ~FileSystem();
     int getBlock(int blockSize);

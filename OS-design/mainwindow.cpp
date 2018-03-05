@@ -3,7 +3,9 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    menu(0),
+    dialog(0)
 {
     ui->setupUi(this);
     ui->progressBar->setRange(0,100);
@@ -20,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(cpu, &WorkerThread_cpu::resultReady, this, &MainWindow::showCPU);
     connect(cpu, &WorkerThread_cpu::destroyed, cpu, &WorkerThread_cpu::deleteLater);
     cpu->start();
+
+    fs = new FileSystem;
+    buildTree(fs->rootDir, "/", 0);
 }
 
 MainWindow::~MainWindow()
@@ -97,20 +102,84 @@ void MainWindow::showCPU()
     ui->progressBar_4->setFormat(QString("%1%").arg(QString::number(cpu->rate[3]*100, 'f', 1)));
 }
 
-void MainWindow::addTreeChild(QTreeWidgetItem *parent, const QString &name, const QString &description)
+void MainWindow::buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent)
 {
-        // QTreeWidgetItem(QTreeWidget * parent, int type = Type)
-        QTreeWidgetItem *treeItem = new QTreeWidgetItem();
-
-        // QTreeWidgetItem::setText(int column, const QString & text)
-        treeItem->setText(0, name);
-        treeItem->setText(1, description);
-
-        // QTreeWidgetItem::addChild(QTreeWidgetItem * child)
+    ui->treeWidget->clear();
+    QTreeWidgetItem *treeItem;
+    if(parent==0)
+    {
+        treeItem = new QTreeWidgetItem(ui->treeWidget);
+        treeItem->setText(0, "/");
+        //treeItem->setText(1, "根目录");
+    }
+    else
+    {
+        treeItem = new QTreeWidgetItem();
+        treeItem->setText(0, fileName);
+        //treeItem->setText(1, description);
         parent->addChild(treeItem);
+    }
+    if(curDir->i_type==Dir)
+    {
+        ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, &MainWindow::showMenu);
+        for(int i=0;i<8;++i)
+        {
+            int blockNum=curDir->i_addr[i];
+            if(1<=blockNum && blockNum<=block_num)
+            {
+                for(int j=0;j<32;++j)
+                {
+                    dirEntry* pe=(dirEntry*)fs->getBlockAddr(blockNum);
+                    int inode_num=pe->inode_num;
+                    char *fileName=pe->fileName;
+                    if(inode_num>0)
+                    {
+                        buildTree(&fs->iTbl.i[inode_num], fileName, treeItem);
+                    }
+                    else
+                        break;
+                }
+            }
+            else
+                break;
+        }
+    }
 }
 
-void MainWindow::showFile()
+void MainWindow::showMenu(const QPoint& pos)
+{
+    if(menu)
+    {
+        delete menu;
+        menu=0;
+    }
+    menu=new QMenu(ui->treeWidget);
+    QAction* createDir=menu->addAction("新建文件夹");
+    QAction* createFile=menu->addAction("新建文件");
+    connect(createDir, &QAction::triggered, this, &MainWindow::newDir);
+    connect(createFile, &QAction::triggered, this, &MainWindow::newFile);
+    menu->exec(QCursor::pos());
+}
+
+void MainWindow::newDir()
+{
+    dialog=new Dialog(0, "请输入路径：");
+    if(dialog->exec()==QDialog::Accepted && fs->changeDir(dialog->name)==0)
+    {
+        free(dialog->name);
+        delete dialog;
+        dialog=new Dialog(0, "请输入文件夹名：");
+        if(dialog->exec()==QDialog::Accepted && fs->createDir(dialog->name)==0)
+        {
+            free(dialog->name);
+            buildTree(fs->rootDir, "/", 0);
+        }
+    }
+
+}
+
+void MainWindow::newFile()
 {
 
 }

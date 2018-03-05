@@ -3,8 +3,12 @@
 
 #include <QMainWindow>
 #include <QTreeWidget>
+#include <QMenu>
+#include <QAction>
 #include <stdio.h>
 #include "monitor.h"
+#include "filesystem.h"
+#include "dialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,13 +25,18 @@ public:
 public slots:
     void showProcess(int p_num);
     void showCPU();
-    void showFile();
+    void showMenu(const QPoint& pos);
+    void newDir();
+    void newFile();
 
 private:
     Ui::MainWindow *ui;
     WorkerThread_monitor *monitor;
     WorkerThread_cpu *cpu;
-    void addTreeChild(QTreeWidgetItem *parent, const QString &name, const QString &description);
+    FileSystem *fs;
+    QMenu* menu;
+    Dialog* dialog;
+    void buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent);
 };
 
 #endif // MAINWINDOW_H

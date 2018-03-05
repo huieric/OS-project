@@ -15,10 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     monitor.cpp \
-    filesystem.cpp
+    filesystem.cpp \
+    dialog.cpp
 
 HEADERS  += mainwindow.h \
     monitor.h \
-    filesystem.h
+    filesystem.h \
+    dialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    dialog.ui
