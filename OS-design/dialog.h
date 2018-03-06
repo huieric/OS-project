@@ -17,7 +17,7 @@ public:
     char* name;
 
 private slots:
-
+    void on_buttonBox_accepted();
 
 private:
     Ui::Dialog *ui;

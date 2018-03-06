@@ -103,7 +103,7 @@
           </rect>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab">
           <attribute name="title">
@@ -458,25 +458,45 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>181</width>
+           <width>161</width>
            <height>381</height>
           </rect>
          </property>
          <column>
           <property name="text">
-           <string>文件系统</string>
+           <string>文件树</string>
           </property>
          </column>
         </widget>
-        <widget class="QPlainTextEdit" name="plainTextEdit">
+        <widget class="QTableWidget" name="tableWidget_2">
          <property name="geometry">
           <rect>
-           <x>180</x>
+           <x>160</x>
            <y>0</y>
-           <width>441</width>
+           <width>461</width>
            <height>381</height>
           </rect>
          </property>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>用户</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>类型</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>大小</string>
+          </property>
+         </column>
         </widget>
        </widget>
       </widget>

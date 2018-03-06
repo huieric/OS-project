@@ -9,6 +9,7 @@
 #include "monitor.h"
 #include "filesystem.h"
 #include "dialog.h"
+#include "no_focus_delegate.h"
 
 namespace Ui {
 class MainWindow;
@@ -25,7 +26,7 @@ public:
 public slots:
     void showProcess(int p_num);
     void showCPU();
-    void showMenu(const QPoint& pos);
+    void showMenu(const QPoint& pos);   
     void newDir();
     void newFile();
 
@@ -37,6 +38,8 @@ private:
     QMenu* menu;
     Dialog* dialog;
     void buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent);
+    void showCurDir();
+    void showFile(QString& fileName, short uid, short type, long size);
 };
 
 #endif // MAINWINDOW_H

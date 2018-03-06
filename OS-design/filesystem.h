@@ -54,7 +54,7 @@ public:
     int releaseBlock(int blockNum, int blockSize);
     int createFile(const char *fileName);
     int deleteFile(const char *fileName);
-    int createDir(const char *dirName);
+    int createDir(char *dirName);
     int deleteDir(const char *dirName);
     int changeDir(const char *dirName);
     int changeName(const char *oldName, const char *newName);

@@ -21,7 +21,8 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     monitor.h \
     filesystem.h \
-    dialog.h
+    dialog.h \
+    no_focus_delegate.h
 
 FORMS    += mainwindow.ui \
     dialog.ui

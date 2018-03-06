@@ -51,14 +51,18 @@ OBJECTS_DIR   = ./
 SOURCES       = ../OS-design/main.cpp \
 		../OS-design/mainwindow.cpp \
 		../OS-design/monitor.cpp \
-		../OS-design/filesystem.cpp moc_mainwindow.cpp \
-		moc_monitor.cpp
+		../OS-design/filesystem.cpp \
+		../OS-design/dialog.cpp moc_mainwindow.cpp \
+		moc_monitor.cpp \
+		moc_dialog.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		monitor.o \
 		filesystem.o \
+		dialog.o \
 		moc_mainwindow.o \
-		moc_monitor.o
+		moc_monitor.o \
+		moc_dialog.o
 DIST          = ../../../Public/Qt/5.5/gcc/mkspecs/features/spec_pre.prf \
 		../../../Public/Qt/5.5/gcc/mkspecs/common/unix.conf \
 		../../../Public/Qt/5.5/gcc/mkspecs/common/linux.conf \
@@ -195,10 +199,13 @@ DIST          = ../../../Public/Qt/5.5/gcc/mkspecs/features/spec_pre.prf \
 		../../../Public/Qt/5.5/gcc/mkspecs/features/lex.prf \
 		../OS-design/OS-design.pro ../OS-design/mainwindow.h \
 		../OS-design/monitor.h \
-		../OS-design/filesystem.h ../OS-design/main.cpp \
+		../OS-design/filesystem.h \
+		../OS-design/dialog.h \
+		../OS-design/no_focus_delegate.h ../OS-design/main.cpp \
 		../OS-design/mainwindow.cpp \
 		../OS-design/monitor.cpp \
-		../OS-design/filesystem.cpp
+		../OS-design/filesystem.cpp \
+		../OS-design/dialog.cpp
 QMAKE_TARGET  = OS-design
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = OS-design
@@ -226,7 +233,7 @@ first: all
 
 ####### Build rules
 
-$(TARGET): ui_mainwindow.h $(OBJECTS)  
+$(TARGET): ui_mainwindow.h ui_dialog.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../OS-design/OS-design.pro ../../../Public/Qt/5.5/gcc/mkspecs/linux-g++-32/qmake.conf ../../../Public/Qt/5.5/gcc/mkspecs/features/spec_pre.prf \
@@ -520,9 +527,9 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../OS-design/mainwindow.h ../OS-design/monitor.h ../OS-design/filesystem.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../OS-design/main.cpp ../OS-design/mainwindow.cpp ../OS-design/monitor.cpp ../OS-design/filesystem.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../OS-design/mainwindow.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../OS-design/mainwindow.h ../OS-design/monitor.h ../OS-design/filesystem.h ../OS-design/dialog.h ../OS-design/no_focus_delegate.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../OS-design/main.cpp ../OS-design/mainwindow.cpp ../OS-design/monitor.cpp ../OS-design/filesystem.cpp ../OS-design/dialog.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../OS-design/mainwindow.ui ../OS-design/dialog.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -545,9 +552,9 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_monitor.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_monitor.cpp moc_dialog.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_monitor.cpp
+	-$(DEL_FILE) moc_mainwindow.cpp moc_monitor.cpp moc_dialog.cpp
 moc_mainwindow.cpp: ../../../Public/Qt/5.5/gcc/include/QtWidgets/QMainWindow \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qmainwindow.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qwidget.h \
@@ -672,10 +679,27 @@ moc_mainwindow.cpp: ../../../Public/Qt/5.5/gcc/include/QtWidgets/QMainWindow \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtabbar.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qrubberband.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtreewidgetitemiterator.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QMenu \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qmenu.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qaction.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qactiongroup.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QAction \
 		../OS-design/monitor.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QThread \
 		../../../Public/Qt/5.5/gcc/include/QtCore/qthread.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QDebug \
+		../OS-design/filesystem.h \
+		../OS-design/dialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialog \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialog.h \
+		../OS-design/no_focus_delegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/QPainter \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpainter.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextoption.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpen.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyledItemDelegate \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qstyleditemdelegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyleOptionViewItem \
 		../OS-design/mainwindow.h
 	/home/huieric/Public/Qt/5.5/gcc/bin/moc $(DEFINES) -I/home/huieric/Public/Qt/5.5/gcc/mkspecs/linux-g++-32 -I/home/huieric/Document/OS-project/OS-design -I/home/huieric/Public/Qt/5.5/gcc/include -I/home/huieric/Public/Qt/5.5/gcc/include/QtWidgets -I/home/huieric/Public/Qt/5.5/gcc/include/QtGui -I/home/huieric/Public/Qt/5.5/gcc/include/QtCore -I. ../OS-design/mainwindow.h -o moc_mainwindow.cpp
 
@@ -750,13 +774,122 @@ moc_monitor.cpp: ../../../Public/Qt/5.5/gcc/include/QtCore/QThread \
 		../OS-design/monitor.h
 	/home/huieric/Public/Qt/5.5/gcc/bin/moc $(DEFINES) -I/home/huieric/Public/Qt/5.5/gcc/mkspecs/linux-g++-32 -I/home/huieric/Document/OS-project/OS-design -I/home/huieric/Public/Qt/5.5/gcc/include -I/home/huieric/Public/Qt/5.5/gcc/include/QtWidgets -I/home/huieric/Public/Qt/5.5/gcc/include/QtGui -I/home/huieric/Public/Qt/5.5/gcc/include/QtCore -I. ../OS-design/monitor.h -o moc_monitor.cpp
 
+moc_dialog.cpp: ../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialog \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qwidget.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qwindowdefs.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qglobal.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qconfig.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfeatures.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsystemdetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qprocessordetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcompilerdetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtypeinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtypetraits.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsysinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlogging.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qflags.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbasicatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_bootstrap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qgenericatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_cxx11.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_gcc.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_msvc.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv7.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv6.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv5.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_ia64.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_mips.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_x86.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_unix.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qglobalstatic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmutex.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qnumeric.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobjectdefs.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qnamespace.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobjectdefs_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qwindowdefs_win.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobject.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstring.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qchar.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbytearray.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qrefcount.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qarraydata.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringbuilder.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qalgorithms.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qiterator.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbytearraylist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringlist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qregexp.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringmatcher.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcoreevent.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qscopedpointer.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmetatype.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvarlengtharray.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcontainerfwd.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qisenum.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobject_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmargins.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpaintdevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qrect.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsize.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qpoint.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpalette.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qcolor.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qrgb.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qbrush.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qpair.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvector.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qmatrix.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpolygon.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qregion.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qdatastream.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qiodevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qline.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtransform.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpainterpath.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qimage.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpixelformat.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpixmap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsharedpointer.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qshareddata.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qhash.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsharedpointer_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfont.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfontmetrics.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfontinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qsizepolicy.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qcursor.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qkeysequence.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qevent.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvariant.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qdebug.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtextstream.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlocale.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qset.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcontiguouscache.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qurl.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qurlquery.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfile.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfiledevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qvector2d.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtouchdevice.h \
+		../OS-design/dialog.h
+	/home/huieric/Public/Qt/5.5/gcc/bin/moc $(DEFINES) -I/home/huieric/Public/Qt/5.5/gcc/mkspecs/linux-g++-32 -I/home/huieric/Document/OS-project/OS-design -I/home/huieric/Public/Qt/5.5/gcc/include -I/home/huieric/Public/Qt/5.5/gcc/include/QtWidgets -I/home/huieric/Public/Qt/5.5/gcc/include/QtGui -I/home/huieric/Public/Qt/5.5/gcc/include/QtCore -I. ../OS-design/dialog.h -o moc_dialog.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_mainwindow.h
+compiler_uic_make_all: ui_mainwindow.h ui_dialog.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_mainwindow.h
+	-$(DEL_FILE) ui_mainwindow.h ui_dialog.h
 ui_mainwindow.h: ../OS-design/mainwindow.ui
 	/home/huieric/Public/Qt/5.5/gcc/bin/uic ../OS-design/mainwindow.ui -o ui_mainwindow.h
+
+ui_dialog.h: ../OS-design/dialog.ui
+	/home/huieric/Public/Qt/5.5/gcc/bin/uic ../OS-design/dialog.ui -o ui_dialog.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -893,10 +1026,27 @@ main.o: ../OS-design/main.cpp ../OS-design/mainwindow.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtabbar.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qrubberband.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtreewidgetitemiterator.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QMenu \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qmenu.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qaction.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qactiongroup.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QAction \
 		../OS-design/monitor.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QThread \
 		../../../Public/Qt/5.5/gcc/include/QtCore/qthread.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QDebug \
+		../OS-design/filesystem.h \
+		../OS-design/dialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialog \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialog.h \
+		../OS-design/no_focus_delegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/QPainter \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpainter.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextoption.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpen.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyledItemDelegate \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qstyleditemdelegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyleOptionViewItem \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/QApplication \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qapplication.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/qcoreapplication.h \
@@ -1031,15 +1181,29 @@ mainwindow.o: ../OS-design/mainwindow.cpp ../OS-design/mainwindow.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtabbar.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qrubberband.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtreewidgetitemiterator.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QMenu \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qmenu.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qaction.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qactiongroup.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QAction \
 		../OS-design/monitor.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QThread \
 		../../../Public/Qt/5.5/gcc/include/QtCore/qthread.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QDebug \
+		../OS-design/filesystem.h \
+		../OS-design/dialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialog \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialog.h \
+		../OS-design/no_focus_delegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/QPainter \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpainter.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextoption.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpen.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyledItemDelegate \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qstyleditemdelegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QStyleOptionViewItem \
 		ui_mainwindow.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/QVariant \
-		../../../Public/Qt/5.5/gcc/include/QtWidgets/QAction \
-		../../../Public/Qt/5.5/gcc/include/QtWidgets/qaction.h \
-		../../../Public/Qt/5.5/gcc/include/QtWidgets/qactiongroup.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/QApplication \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qapplication.h \
 		../../../Public/Qt/5.5/gcc/include/QtCore/qcoreapplication.h \
@@ -1062,10 +1226,8 @@ mainwindow.o: ../OS-design/mainwindow.cpp ../OS-design/mainwindow.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qplaintextedit.h \
 		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtextedit.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qtextdocument.h \
-		../../../Public/Qt/5.5/gcc/include/QtGui/qtextoption.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qtextcursor.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qtextformat.h \
-		../../../Public/Qt/5.5/gcc/include/QtGui/qpen.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qabstracttextdocumentlayout.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qtextlayout.h \
 		../../../Public/Qt/5.5/gcc/include/QtGui/qglyphrun.h \
@@ -1166,11 +1328,163 @@ monitor.o: ../OS-design/monitor.cpp ../OS-design/monitor.h \
 filesystem.o: ../OS-design/filesystem.cpp ../OS-design/filesystem.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filesystem.o ../OS-design/filesystem.cpp
 
+dialog.o: ../OS-design/dialog.cpp ../OS-design/dialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialog \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qwidget.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qwindowdefs.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qglobal.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qconfig.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfeatures.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsystemdetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qprocessordetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcompilerdetection.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtypeinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtypetraits.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsysinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlogging.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qflags.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbasicatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_bootstrap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qgenericatomic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_cxx11.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_gcc.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_msvc.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv7.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv6.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_armv5.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_ia64.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_mips.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_x86.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qatomic_unix.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qglobalstatic.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmutex.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qnumeric.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobjectdefs.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qnamespace.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobjectdefs_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qwindowdefs_win.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobject.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstring.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qchar.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbytearray.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qrefcount.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qarraydata.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringbuilder.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qalgorithms.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qiterator.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qbytearraylist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringlist.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qregexp.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qstringmatcher.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcoreevent.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qscopedpointer.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmetatype.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvarlengtharray.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcontainerfwd.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qisenum.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qobject_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmargins.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpaintdevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qrect.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsize.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qpoint.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpalette.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qcolor.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qrgb.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qbrush.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qpair.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvector.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qmatrix.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpolygon.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qregion.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qdatastream.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qiodevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qline.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtransform.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpainterpath.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qimage.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpixelformat.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpixmap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsharedpointer.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qshareddata.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qhash.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qsharedpointer_impl.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfont.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfontmetrics.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qfontinfo.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qsizepolicy.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qcursor.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qkeysequence.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qevent.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qvariant.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qmap.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qdebug.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qtextstream.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qlocale.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qset.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcontiguouscache.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qurl.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qurlquery.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfile.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qfiledevice.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qvector2d.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtouchdevice.h \
+		ui_dialog.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/QVariant \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QAction \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qaction.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qicon.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qactiongroup.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QApplication \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qapplication.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qcoreapplication.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qeventloop.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdesktopwidget.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qguiapplication.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qinputmethod.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QButtonGroup \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qbuttongroup.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QDialogButtonBox \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qdialogbuttonbox.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QHeaderView \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qheaderview.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qabstractitemview.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qabstractscrollarea.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qframe.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qabstractitemmodel.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qitemselectionmodel.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qabstractitemdelegate.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qstyleoption.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qabstractspinbox.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qvalidator.h \
+		../../../Public/Qt/5.5/gcc/include/QtCore/qregularexpression.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qslider.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qabstractslider.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qstyle.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtabbar.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qtabwidget.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qrubberband.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QLabel \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qlabel.h \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/QLineEdit \
+		../../../Public/Qt/5.5/gcc/include/QtWidgets/qlineedit.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextcursor.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextformat.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qpen.h \
+		../../../Public/Qt/5.5/gcc/include/QtGui/qtextoption.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dialog.o ../OS-design/dialog.cpp
+
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
 
 moc_monitor.o: moc_monitor.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_monitor.o moc_monitor.cpp
+
+moc_dialog.o: moc_dialog.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_dialog.o moc_dialog.cpp
 
 ####### Install
 
