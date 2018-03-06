@@ -218,16 +218,6 @@ public:
         treeWidget->setObjectName(QStringLiteral("treeWidget"));
         treeWidget->setGeometry(QRect(0, 0, 161, 381));
         tableWidget_2 = new QTableWidget(page_5);
-        if (tableWidget_2->columnCount() < 4)
-            tableWidget_2->setColumnCount(4);
-        QTableWidgetItem *__qtablewidgetitem4 = new QTableWidgetItem();
-        tableWidget_2->setHorizontalHeaderItem(0, __qtablewidgetitem4);
-        QTableWidgetItem *__qtablewidgetitem5 = new QTableWidgetItem();
-        tableWidget_2->setHorizontalHeaderItem(1, __qtablewidgetitem5);
-        QTableWidgetItem *__qtablewidgetitem6 = new QTableWidgetItem();
-        tableWidget_2->setHorizontalHeaderItem(2, __qtablewidgetitem6);
-        QTableWidgetItem *__qtablewidgetitem7 = new QTableWidgetItem();
-        tableWidget_2->setHorizontalHeaderItem(3, __qtablewidgetitem7);
         tableWidget_2->setObjectName(QStringLiteral("tableWidget_2"));
         tableWidget_2->setGeometry(QRect(160, 0, 461, 381));
         toolBox->addItem(page_5, QString::fromUtf8("\344\273\273\345\212\241\344\272\224\357\274\232\346\250\241\346\213\237\346\226\207\344\273\266\347\263\273\347\273\237"));
@@ -244,7 +234,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        toolBox->setCurrentIndex(3);
+        toolBox->setCurrentIndex(4);
         tabWidget->setCurrentIndex(0);
 
 
@@ -286,15 +276,7 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "\346\226\207\344\273\266\347\263\273\347\273\237", 0));
         toolBox->setItemText(toolBox->indexOf(page_4), QApplication::translate("MainWindow", "\344\273\273\345\212\241\345\233\233\357\274\232\347\263\273\347\273\237\347\233\221\350\247\206\345\231\250", 0));
         QTreeWidgetItem *___qtreewidgetitem = treeWidget->headerItem();
-        ___qtreewidgetitem->setText(0, QApplication::translate("MainWindow", "\346\226\207\344\273\266\347\263\273\347\273\237", 0));
-        QTableWidgetItem *___qtablewidgetitem4 = tableWidget_2->horizontalHeaderItem(0);
-        ___qtablewidgetitem4->setText(QApplication::translate("MainWindow", "\345\220\215\347\247\260", 0));
-        QTableWidgetItem *___qtablewidgetitem5 = tableWidget_2->horizontalHeaderItem(1);
-        ___qtablewidgetitem5->setText(QApplication::translate("MainWindow", "\347\224\250\346\210\267", 0));
-        QTableWidgetItem *___qtablewidgetitem6 = tableWidget_2->horizontalHeaderItem(2);
-        ___qtablewidgetitem6->setText(QApplication::translate("MainWindow", "\347\261\273\345\236\213", 0));
-        QTableWidgetItem *___qtablewidgetitem7 = tableWidget_2->horizontalHeaderItem(3);
-        ___qtablewidgetitem7->setText(QApplication::translate("MainWindow", "\345\244\247\345\260\217", 0));
+        ___qtreewidgetitem->setText(0, QApplication::translate("MainWindow", "\346\226\207\344\273\266\346\240\221", 0));
         toolBox->setItemText(toolBox->indexOf(page_5), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\272\224\357\274\232\346\250\241\346\213\237\346\226\207\344\273\266\347\263\273\347\273\237", 0));
     } // retranslateUi
 

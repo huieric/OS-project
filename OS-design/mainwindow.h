@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTableWidget>
 #include <QTreeWidget>
 #include <QMenu>
 #include <QAction>
@@ -26,9 +27,13 @@ public:
 public slots:
     void showProcess(int p_num);
     void showCPU();
-    void showMenu(const QPoint& pos);   
+    void showMenu(const QPoint& pos);
+    void showTableMenu(const QPoint& pos);
     void newDir();
     void newFile();
+    void newDir_table();
+    void newFile_table();
+    void tableDoubleClickedSlots(QModelIndex index);
 
 private:
     Ui::MainWindow *ui;
@@ -36,6 +41,7 @@ private:
     WorkerThread_cpu *cpu;
     FileSystem *fs;
     QMenu* menu;
+    QMenu* table_menu;
     Dialog* dialog;
     void buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent);
     void showCurDir();

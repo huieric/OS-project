@@ -477,26 +477,6 @@
            <height>381</height>
           </rect>
          </property>
-         <column>
-          <property name="text">
-           <string>名称</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>用户</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>类型</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>大小</string>
-          </property>
-         </column>
         </widget>
        </widget>
       </widget>

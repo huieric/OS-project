@@ -2,6 +2,10 @@
 #define FILESYSTEM_H
 
 #include <bits/stdc++.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <QDebug>
 #define Dir 0
 #define File 1
 
@@ -33,6 +37,12 @@ typedef struct
     char fileName[14];
 }dirEntry;
 
+typedef struct
+{
+    dirEntry* pe[100];
+    int cur;
+}Path;
+
 class FileSystem
 {
 private:
@@ -44,7 +54,7 @@ public:
     iNodeTable iTbl;
     iNode* rootDir;
     iNode* curDir;
-    char path[200];
+    Path path;
 
     FileSystem();
     virtual ~FileSystem();
@@ -59,8 +69,9 @@ public:
     int changeDir(const char *dirName);
     int changeName(const char *oldName, const char *newName);
     void list();
-    int open(const char *fileName);
-    int close(const char *fileName);
+    int open(char *fileName);
+    int close(char *fileName);
+    void pwd();
 };
 
 #endif // FILESYSTEM_H

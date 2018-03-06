@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     menu(0),
+    table_menu(0),
     dialog(0)
 {
     ui->setupUi(this);
@@ -14,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->progressBar_4->setRange(0,100);
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, &MainWindow::showMenu);
+    ui->tableWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableWidget_2, &QTableWidget::customContextMenuRequested, this, &MainWindow::showTableMenu);
+    connect(ui->tableWidget_2, &QTableWidget::doubleClicked, this, &MainWindow::tableDoubleClickedSlots);
 
     QTableWidget& tablewidget=*ui->tableWidget_2;
     tablewidget.setColumnCount(4);
@@ -22,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    font.setBold(true);
 //    tablewidget.horizontalHeader()->setFont(font);
     tablewidget.horizontalHeader()->setStretchLastSection(true);
-    tablewidget.verticalHeader()->setDefaultSectionSize(10);
+    tablewidget.verticalHeader()->setDefaultSectionSize(25);
     //tablewidget.setFrameShape(QFrame::NoFrame);
     tablewidget.setShowGrid(false);
     tablewidget.verticalHeader()->setVisible(false);
@@ -30,7 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     tablewidget.setSelectionBehavior(QAbstractItemView::SelectRows);
     tablewidget.setEditTriggers(QAbstractItemView::NoEditTriggers);
     tablewidget.setStyleSheet("selection-background-color:lightblue;");
-    tablewidget.setItemDelegate(new NoFocusDelegate());
+    //tablewidget.setItemDelegate(new NoFocusDelegate());
+    QStringList header;
+    header<<QString("名称")<<QString("用户")<<QString("类型")<<QString("大小");
+    ui->tableWidget_2->setHorizontalHeaderLabels(header);
 
     monitor = new WorkerThread_monitor;
     connect(monitor, &WorkerThread_monitor::resultReady, this, &MainWindow::showProcess);
@@ -174,22 +181,29 @@ void MainWindow::buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* paren
 void MainWindow::showCurDir()
 {
     iNode* curDir=fs->curDir;
-    showFile("..",0,-1,0);
+    for(int i=ui->tableWidget_2->rowCount()-1;i>=0;--i)
+        ui->tableWidget_2->removeRow(i);
+    QString fileName=" . .";
+    showFile(fileName,0,-1,0);
     for(int i=0;i<8;++i)
     {
-        dirEntry* pe=(dirEntry*)fs->getBlockAddr(curDir->i_addr[i]);
-        for(int j=0;j<32;++j)
+        int blockNum=curDir->i_addr[i];
+        if(1<=blockNum && blockNum<=block_num)
         {
-            int inode_num=pe->inode_num;
-            char* fileName=pe->fileName;
-            if(inode_num>0)
+            dirEntry* pe=(dirEntry*)fs->getBlockAddr(blockNum);
+            for(int j=0;j<32;++j)
             {
-                iNode* inode=&fs->iTbl.i[inode_num];
-                showFile(QString(fileName), inode->i_uid, inode->i_type, inode->i_size);
-                pe++;
+                int inode_num=pe->inode_num;
+                fileName=pe->fileName;
+                if(inode_num>0)
+                {
+                    iNode* inode=&fs->iTbl.i[inode_num];
+                    showFile(fileName, inode->i_uid, inode->i_type, inode->i_size);
+                    pe++;
+                }
+                else
+                    return;
             }
-            else
-                return;
         }
     }
 }
@@ -199,6 +213,14 @@ void MainWindow::showFile(QString& fileName, short uid, short type, long size)
     QTableWidget* tablewidget=ui->tableWidget_2;
     int row_count=tablewidget->rowCount();
     tablewidget->insertRow(row_count);
+    if(type==-1)
+    {
+        QTableWidgetItem* item=new QTableWidgetItem();
+        item->setText(fileName);
+        item->setTextAlignment(Qt::AlignCenter);
+        tablewidget->setItem(row_count,0,item);
+        return;
+    }
     QTableWidgetItem* item=new QTableWidgetItem();
     QTableWidgetItem* item1=new QTableWidgetItem();
     QTableWidgetItem* item2=new QTableWidgetItem();
@@ -214,6 +236,10 @@ void MainWindow::showFile(QString& fileName, short uid, short type, long size)
     tablewidget->setItem(row_count,1,item1);
     tablewidget->setItem(row_count,2,item2);
     tablewidget->setItem(row_count,3,item3);
+    item->setTextAlignment(Qt::AlignCenter);
+    item1->setTextAlignment(Qt::AlignCenter);
+    item2->setTextAlignment(Qt::AlignCenter);
+    item3->setTextAlignment(Qt::AlignCenter);
     QColor color("gray");
     item1->setTextColor(color);
     item2->setTextColor(color);
@@ -232,7 +258,61 @@ void MainWindow::showMenu(const QPoint& pos)
     QAction* createFile=menu->addAction("新建文件");
     connect(createDir, &QAction::triggered, this, &MainWindow::newDir);
     connect(createFile, &QAction::triggered, this, &MainWindow::newFile);
-    menu->exec(QCursor::pos());
+    menu->exec(QCursor::pos());  
+}
+
+void MainWindow::showTableMenu(const QPoint &pos)
+{
+    if(table_menu)
+    {
+        delete table_menu;
+        table_menu=0;
+    }
+    table_menu=new QMenu(ui->tableWidget_2);
+    QAction* action_create_folder=new QAction(ui->tableWidget_2);
+    QAction* action_create_file=new QAction(ui->tableWidget_2);
+    QAction* action_rename=new QAction(ui->tableWidget_2);
+    QAction* action_delete=new QAction(ui->tableWidget_2);
+    action_create_folder->setText("新建文件夹");
+    action_create_file->setText("新建文件");
+    action_rename->setText("删除");
+    action_delete->setText("重命名");
+    QTableWidgetItem* item=ui->tableWidget_2->itemAt(pos);
+    if(item!=0)
+    {
+        table_menu->addAction(action_delete);
+        table_menu->addAction(action_rename);
+    }
+    else
+    {
+        table_menu->addAction(action_create_folder);
+        table_menu->addAction(action_create_file);
+        connect(action_create_folder, &QAction::triggered, this, &MainWindow::newDir_table);
+        connect(action_create_file, &QAction::triggered, this, &MainWindow::newFile_table);
+    }
+    table_menu->exec(QCursor::pos());
+}
+
+void MainWindow::newDir_table()
+{
+    dialog=new Dialog(0, "请输入文件夹名：");
+    if(dialog->exec()==QDialog::Accepted && fs->createDir(dialog->name)==0)
+    {
+        free(dialog->name);
+        buildTree(fs->rootDir, "/", 0);
+        showCurDir();
+    }
+}
+
+void MainWindow::newFile_table()
+{
+    dialog=new Dialog(1, "请输入文件名：");
+    if(dialog->exec()==QDialog::Accepted && fs->createFile(dialog->name)==0)
+    {
+        free(dialog->name);
+        buildTree(fs->rootDir, "/", 0);
+        showCurDir();
+    }
 }
 
 void MainWindow::newDir()
@@ -247,6 +327,7 @@ void MainWindow::newDir()
         {
             free(dialog->name);
             buildTree(fs->rootDir, "/", 0);
+            showCurDir();
         }
     }
 }
@@ -263,6 +344,50 @@ void MainWindow::newFile()
         {
             free(dialog->name);
             buildTree(fs->rootDir, "/", 0);
+            showCurDir();
+        }
+    }
+}
+
+void MainWindow::tableDoubleClickedSlots(QModelIndex index)
+{
+    int row=index.row();
+    QString file_name=ui->tableWidget_2->item(row, 0)->text();
+    char* fileName=file_name.toLatin1().data();
+    if(strcmp(fileName," . .")==0 && fs->curDir==fs->rootDir)
+    {
+        return;
+    }
+    if(strcmp(fileName," . .")==0 && fs->changeDir("..")==0)
+    {
+        showCurDir();
+        return;
+    }
+    for(int i=0;i<8;++i)
+    {
+        dirEntry* pe=(dirEntry*)fs->getBlockAddr(fs->curDir->i_addr[i]);
+        for(int j=0;j<32;++j)
+        {
+            if(pe->inode_num==0) return;
+            if(strcmp(pe->fileName, fileName)==0)
+            {
+                iNode& inode=fs->iTbl.i[pe->inode_num];
+                if(inode.i_type==Dir)
+                {
+                    if(fs->changeDir(fileName)==0)
+                    {
+                        showCurDir();
+                        fs->pwd();
+                    }
+                }
+                else
+                {
+//                    qDebug() << fileName;
+                    fs->open(fileName);
+                }
+                return;
+            }
+            pe++;
         }
     }
 }
