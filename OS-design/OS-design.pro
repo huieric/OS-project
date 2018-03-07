@@ -16,13 +16,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     monitor.cpp \
     filesystem.cpp \
-    dialog.cpp
+    dialog.cpp \
+    edit.cpp
 
 HEADERS  += mainwindow.h \
     monitor.h \
     filesystem.h \
     dialog.h \
-    no_focus_delegate.h
+    no_focus_delegate.h \
+    edit.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    edit.ui

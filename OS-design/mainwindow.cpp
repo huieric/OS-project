@@ -52,12 +52,50 @@ MainWindow::MainWindow(QWidget *parent) :
     fs = new FileSystem;
     buildTree(fs->rootDir, "/", 0);
     showCurDir();
+
+    p_CPU=new QProcess;
+    p_Sum=new QProcess;
+    p_Time=new QProcess;
+    connect(p_CPU, &QProcess::readyRead, this, &MainWindow::readCPU);
+    connect(p_Sum, &QProcess::readyRead, this, &MainWindow::readSum);
+    connect(p_Time, &QProcess::readyRead, this, &MainWindow::readTime);
+    p_CPU->start("./showCPU");
+    p_Sum->start("./showSum");
+    p_Time->start("./showTime");
+
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText("安装");
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("卸载");
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    //delete fs;
+    delete fs;
+}
+
+void MainWindow::readCPU()
+{
+    char temp[10];
+    strcpy(temp, p_CPU->readAll().data());
+    temp[strlen(temp)-1]='\0';
+//    qDebug() << temp;
+    double utilization=QString(temp).toDouble()*100;
+    ui->progressBar_6->setRange(0,100);
+    ui->progressBar_6->setValue(utilization);
+    ui->progressBar_6->setFormat(QString::number(utilization,'f',1)+"%");
+}
+
+void MainWindow::readSum()
+{
+    char temp[30];
+    strcpy(temp, p_Sum->readAll().data());
+    temp[strlen(temp)-1]='\0';
+    ui->textBrowser->append(QString(temp));
+}
+
+void MainWindow::readTime()
+{
+    ui->label_10->setText(QString(p_Time->readAll()));
 }
 
 void MainWindow::showProcess(int p_num)
@@ -133,7 +171,6 @@ void MainWindow::showCPU()
 void MainWindow::buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent)
 {    
     QTreeWidgetItem *treeItem;
-    printf("Building file tree...\n");
     if(parent==0)
     {
         ui->treeWidget->clear();
@@ -271,26 +308,38 @@ void MainWindow::showTableMenu(const QPoint &pos)
     table_menu=new QMenu(ui->tableWidget_2);
     QAction* action_create_folder=new QAction(ui->tableWidget_2);
     QAction* action_create_file=new QAction(ui->tableWidget_2);
-    QAction* action_rename=new QAction(ui->tableWidget_2);
+    //QAction* action_rename=new QAction(ui->tableWidget_2);
     QAction* action_delete=new QAction(ui->tableWidget_2);
     action_create_folder->setText("新建文件夹");
     action_create_file->setText("新建文件");
-    action_rename->setText("删除");
-    action_delete->setText("重命名");
+    //action_rename->setText("删除");
+    action_delete->setText("删除");
+    connect(action_delete, &QAction::triggered, this, &MainWindow::deleteFile);
+    connect(action_create_folder, &QAction::triggered, this, &MainWindow::newDir_table);
+    connect(action_create_file, &QAction::triggered, this, &MainWindow::newFile_table);
     QTableWidgetItem* item=ui->tableWidget_2->itemAt(pos);
     if(item!=0)
     {
         table_menu->addAction(action_delete);
-        table_menu->addAction(action_rename);
+        //table_menu->addAction(action_rename);
+        file_name=ui->tableWidget_2->item(item->row(), 0)->text();
     }
     else
     {
         table_menu->addAction(action_create_folder);
-        table_menu->addAction(action_create_file);
-        connect(action_create_folder, &QAction::triggered, this, &MainWindow::newDir_table);
-        connect(action_create_file, &QAction::triggered, this, &MainWindow::newFile_table);
+        table_menu->addAction(action_create_file);        
     }
     table_menu->exec(QCursor::pos());
+}
+
+void MainWindow::deleteFile()
+{
+    qDebug() << file_name;
+    if(fs->remove(file_name.toLatin1().data())==0)
+    {
+        showCurDir();
+        buildTree(fs->rootDir, "/", 0);
+    }
 }
 
 void MainWindow::newDir_table()
@@ -382,12 +431,73 @@ void MainWindow::tableDoubleClickedSlots(QModelIndex index)
                 }
                 else
                 {
-//                    qDebug() << fileName;
                     fs->open(fileName);
+                    showCurDir();
                 }
                 return;
             }
             pe++;
         }
+    }
+}
+
+void MainWindow::on_buttonBox_accepted()
+{
+    QStringList options;
+    QProcess* p=new QProcess;
+    options << "-c" << "insmod /home/huieric/Document/OS-project/Step3/myDrive.ko";
+    p->start("/bin/bash",options);
+    p->waitForFinished();
+    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+    options.clear();
+    options << "-c" << "cat /proc/devices | grep myDevice";
+    p->start("/bin/bash",options);
+    p->waitForFinished();
+    char temp[10];
+    char* dev_mesg=p->readAll().data();
+    qDebug() << dev_mesg;
+    char* pt=strchr(dev_mesg, ' ');
+    strncpy(temp, dev_mesg, pt-dev_mesg);
+    temp[pt-dev_mesg]='\0';
+    qDebug() << temp;
+    options.clear();
+    options << "-c" << QString("mknod /dev/myDevice c ")+temp+" 0";
+    p->start("/bin/bash",options);
+    p->waitForFinished();
+    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+}
+
+void MainWindow::on_buttonBox_rejected()
+{
+    QStringList options;
+    QProcess* p=new QProcess;
+    options << "-c" << "rmmod /home/huieric/Document/OS-project/Step3/myDrive.ko";
+    p->start("/bin/bash",options);
+    p->waitForFinished();
+    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+}
+
+void MainWindow::on_lineEdit_textChanged(const QString &arg1)
+{
+    qDebug() << arg1;
+    char buf[MAX_SIZE];
+    char* in;
+    int fd = open("/dev/myDevice", O_RDWR | O_NONBLOCK);
+    if(fd != -1)
+    {
+        read(fd, buf, sizeof(buf));
+        ui->label_11->setText(buf);
+
+//        in=arg1.toLatin1().data();
+//        write(fd, in, sizeof(in));
+
+//        read(fd, buf, sizeof(buf));
+//        ui->label_11->setText(buf);
+
+       //close(fd);
+    }
+    else
+    {
+        ui->label_11->setText("Open myDevice failed!\n");
     }
 }

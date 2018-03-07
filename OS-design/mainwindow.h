@@ -6,7 +6,15 @@
 #include <QTreeWidget>
 #include <QMenu>
 #include <QAction>
+#include <QProcess>
+#include <QTextCodec>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "monitor.h"
 #include "filesystem.h"
 #include "dialog.h"
@@ -25,6 +33,9 @@ public:
     ~MainWindow();
 
 public slots:
+    void readCPU();
+    void readSum();
+    void readTime();
     void showProcess(int p_num);
     void showCPU();
     void showMenu(const QPoint& pos);
@@ -34,15 +45,25 @@ public slots:
     void newDir_table();
     void newFile_table();
     void tableDoubleClickedSlots(QModelIndex index);
+    void deleteFile();
+
+private slots:
+    void on_buttonBox_accepted();
+
+    void on_buttonBox_rejected();
+
+    void on_lineEdit_textChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
+    QProcess *p_CPU, *p_Sum, *p_Time;
     WorkerThread_monitor *monitor;
     WorkerThread_cpu *cpu;
     FileSystem *fs;
     QMenu* menu;
     QMenu* table_menu;
     Dialog* dialog;
+    QString file_name;
     void buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent);
     void showCurDir();
     void showFile(QString& fileName, short uid, short type, long size);

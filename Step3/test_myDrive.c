@@ -16,12 +16,12 @@ int main() {
         read(fd, buf, sizeof(buf));
         printf("%s\n", buf);
 
-        printf("Input: ");
+        //printf("Input: ");
         fgets(in, sizeof(in), stdin);
         write(fd, in, sizeof(in));
 
         read(fd, buf, sizeof(buf));
-        printf("myDevice: %s\n", buf);
+        printf("%s\n", buf);
 
         close(fd);
         return 0;

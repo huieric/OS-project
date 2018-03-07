@@ -6,13 +6,13 @@ FileSystem::FileSystem() :
     blockStartAddr(systemStartAddr+bit_map_size)
 {
     memset(systemStartAddr, 0, fs_size);
-    FILE *fs=fopen("myfs", "r");
+    FILE *fs=fopen("myfs.txt", "r");
     if(fs==0)
     {
-        printf("Filesystem first opened\n");
+        qDebug() << "Filesystem first opened";
         for(int i=0;i<bit_map_size;++i)
             bitmapStartAddr[i]='0';
-        printf("Creating root directory...\n");
+        qDebug()<<"Creating root directory...";
         iNode& inode=iTbl.i[iTbl.num++];
         inode.i_uid=0;
         inode.i_type=Dir;
@@ -22,11 +22,11 @@ FileSystem::FileSystem() :
         inode.i_addr[0]=getBlock(1);
         curDir=rootDir=&inode;
         path.cur=0;
-        printf("done\n");
+        qDebug() << "done";
     }
     else
     {
-        printf("Filesystem initialized...\n");
+        qDebug() << "Filesystem initialized...";
         fscanf(fs, "%d", &iTbl.num);
         for(int i=0;i<iTbl.num;++i)
         {
@@ -34,9 +34,7 @@ FileSystem::FileSystem() :
             fscanf(fs, "%hd%hd%s%hd%ld", &inode.i_uid, &inode.i_type, inode.i_mode, &inode.i_ilink, &inode.i_size);
             for(int j=0;j<8;++j) fscanf(fs,"%d", &inode.i_addr[j]);
         }
-        long skip=1+(sizeof(iNode)+6)*(block_num-iTbl.num);
-        fseek(fs,skip,SEEK_CUR);
-
+        fseek(fs,1,SEEK_CUR);
         for(int i=0;i<bit_map_size;++i)
         {
             fscanf(fs,"%c",bitmapStartAddr+i);
@@ -47,15 +45,16 @@ FileSystem::FileSystem() :
 
         curDir=rootDir=&iTbl.i[0];
         path.cur=0;
+        qDebug() << "done";
     }
 }
 
 FileSystem::~FileSystem()
 {
-    FILE *fs=fopen("myfs", "w");
-    printf("Filesystem saving changes...\n");
+    FILE *fs=fopen("myfs.txt", "w");
+    qDebug() << "Filesystem saving changes...";
     fprintf(fs, "%d ", iTbl.num);
-    for(int i=0;i<block_num;++i)
+    for(int i=0;i<iTbl.num;++i)
     {
         iNode &inode=iTbl.i[i];
         fprintf(fs, "%hd %hd %s %hd %ld ", inode.i_uid, inode.i_type, inode.i_mode, inode.i_ilink, inode.i_size);
@@ -67,8 +66,8 @@ FileSystem::~FileSystem()
     }
     fwrite(blockStartAddr, block_size, block_num, fs);
     fclose(fs);
-    printf("done\n");
-    printf("Filesystem closed\n");
+    qDebug() << "done";
+    qDebug() << "Filesystem closed";
     free(systemStartAddr);
 }
 
@@ -91,10 +90,8 @@ int FileSystem::getBlock(int blockSize)
                 return start;
             }
         }
-        else
-            counter=0;
     }
-    printf("No enough disk storage\n");
+    qDebug() << "No enough disk storage\n";
     return -1;
 }
 
@@ -115,7 +112,10 @@ int FileSystem::releaseBlock(int blockNum, int blockSize)
 {
     int endBlock = blockNum+blockSize;
     for(int i=blockNum;i<endBlock;++i)
+    {
         bitmapStartAddr[i]='0';
+        memset(getBlockAddr(i), 0, 512);
+    }
     return 0;
 }
 
@@ -145,9 +145,66 @@ int FileSystem::createFile(const char *fileName)
     return -1;
 }
 
-int FileSystem::deleteFile(const char *fileName)
+int FileSystem::remove(const char *fileName)
 {
+    qDebug() << "Removing" << fileName;
+    iNode* inode;
+    dirEntry *pe, *pl, *p;
+    for(int i=0;i<8;++i)
+    {
+        p=(dirEntry*)getBlockAddr(curDir->i_addr[i]);
+        for(int j=0;j<32;++j)
+        {
+            if(p->inode_num==0)
+            {
+                pl=p-1;
+                goto Done;
+            }
+            if(strcmp(p->fileName,fileName)==0)
+            {
+                pe=p;
+            }
+            p++;
+        }
+    }
+Done:
+    inode=&iTbl.i[pe->inode_num];
+    removeInode(inode);
+    pe->inode_num=pl->inode_num;
+    strcpy(pe->fileName, pl->fileName);
+    pl->inode_num=0;
+    return 0;
+}
 
+int FileSystem::removeInode(iNode *inode)
+{
+    dirEntry*p;
+    if(inode->i_type==Dir)
+    {
+        for(int i=0;i<8;++i)
+        {
+            p=(dirEntry*)getBlockAddr(inode->i_addr[i]);
+            for(int j=0;j<32;++j)
+            {
+                if(p->inode_num==0)
+                {
+                    goto LABEL2;
+                }
+                iNode* i1=&iTbl.i[p->inode_num];
+                removeInode(i1);
+                p++;
+            }
+        }
+    }
+LABEL2:
+    for(int i=0;i<8;++i)
+    {
+        if(inode->i_addr[i]>0)
+            releaseBlock(inode->i_addr[i],1);
+        else
+            break;
+    }
+    return 0;
 }
 
 int FileSystem::createDir(char *dirName)
@@ -176,11 +233,6 @@ int FileSystem::createDir(char *dirName)
         }
     }
     return -1;
-}
-
-int FileSystem::deleteDir(const char *dirName)
-{
-
 }
 
 int FileSystem::changeDir(const char *dirName)
@@ -261,7 +313,6 @@ void FileSystem::list()
 
 int FileSystem::open(char *fileName)
 {
-    qDebug() << fileName;
     iNode* inode;
     for(int i=0;i<8;++i)
     {
@@ -279,9 +330,10 @@ int FileSystem::open(char *fileName)
         }
     }
 Found:
-    qDebug() << fileName;
-    FILE* ft=fopen(fileName, "w");
     long left=inode->i_size;
+    char buf[513];
+    hedit=new Edit;
+    hedit->setWindowTitle(fileName);
     if(inode->i_size<=8*512)
     {
         for(int i=0;i<8;++i)
@@ -290,53 +342,53 @@ Found:
                 break;
             if(left>=512)
             {
-                fread(getBlockAddr(inode->i_addr[i]), 512, 1, ft);
+                char* s=getBlockAddr(inode->i_addr[i]);
+                strncpy(buf,getBlockAddr(inode->i_addr[i]), 512);
+                buf[512]='\0';
+                hedit->setTextEdit(buf);
                 left-=512;
             }
             else
             {
-                fread(getBlockAddr(inode->i_addr[i]), left, 1, ft);
+                char* s=getBlockAddr(inode->i_addr[i]);
+                strncpy(buf,getBlockAddr(inode->i_addr[i]), left);
+                buf[left]='\0';
+                hedit->setTextEdit(buf);
                 left=0;
             }
         }
     }
-    fclose(ft);
-    pid_t p;
-    int status;
-    qDebug() << fileName;
-    char* arg[]={"gedit", fileName, 0};
-    if((p=fork())==0)
-    {
-        execvp("gedit", arg);
-    }
-    waitpid(p, &status, 0);
 
-    ft=fopen(fileName, "r");
-    fseek(ft, 0, SEEK_END);
-    left=ftell(ft);
-    inode->i_size=left;
-    qDebug()<<left;
-    if(left<=8*512)
+    if(hedit->exec()==QDialog::Accepted)
     {
-        for(int i=0;i<8;++i)
+        left=strlen(hedit->text);
+        inode->i_size=left;
+        if(left<=8*512)
         {
-            if(left==0)
+            for(int i=0;i<8;++i)
             {
-                inode->i_addr[i]=0;
-            }
-            if(left>=512)
-            {
-                fwrite(getBlockAddr(inode->i_addr[i]), 512, 1, ft);
-                left-=512;
-            }
-            else
-            {
-                fwrite(getBlockAddr(inode->i_addr[i]), left, 1, ft);
-                left=0;
+                if(left==0)
+                {
+                    inode->i_addr[i]=0;
+                }
+                if(left>=512)
+                {
+                    if(inode->i_addr[i]==0)
+                        inode->i_addr[i]=getBlock(1);
+                    strncpy(getBlockAddr(inode->i_addr[i]), hedit->text, 512);
+                    left-=512;
+                }
+                else
+                {
+                    if(inode->i_addr[i]==0)
+                        inode->i_addr[i]=getBlock(1);
+                    strncpy(getBlockAddr(inode->i_addr[i]), hedit->text, left);
+                    left=0;
+                }
             }
         }
+        free(hedit->text);
     }
-    fclose(ft);
     return 0;
 }
 

@@ -6,8 +6,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <QDebug>
+#include "edit.h"
 #define Dir 0
 #define File 1
+
+using namespace std;
 
 typedef struct
 {
@@ -19,7 +22,7 @@ typedef struct
     int i_addr[8];
 }iNode;
 
-const int max_file_size = 100*1024*1024;
+const int max_file_size = 1*1024*1024;
 const int block_size = 512;
 const int block_num = max_file_size/block_size;
 const int bit_map_size = block_num;
@@ -28,7 +31,7 @@ const int fs_size = max_file_size + bit_map_size;
 typedef struct
 {
     int num;
-    iNode i[100];
+    iNode i[block_num];
 }iNodeTable;
 
 typedef struct
@@ -48,7 +51,8 @@ class FileSystem
 private:
     char *const systemStartAddr;
     char *const bitmapStartAddr;
-    char *const blockStartAddr;        
+    char *const blockStartAddr;
+    Edit* hedit;
 
 public:
     iNodeTable iTbl;
@@ -63,9 +67,9 @@ public:
     int getAddrBlock(char* addr);
     int releaseBlock(int blockNum, int blockSize);
     int createFile(const char *fileName);
-    int deleteFile(const char *fileName);
+    int remove(const char *fileName);
+    int removeInode(iNode* inode);
     int createDir(char *dirName);
-    int deleteDir(const char *dirName);
     int changeDir(const char *dirName);
     int changeName(const char *oldName, const char *newName);
     void list();

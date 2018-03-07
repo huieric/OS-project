@@ -13,9 +13,11 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QProgressBar>
@@ -23,6 +25,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QToolBox>
 #include <QtWidgets/QTreeWidget>
@@ -40,8 +43,18 @@ public:
     QSpacerItem *horizontalSpacer;
     QToolBox *toolBox;
     QWidget *page;
+    QTextBrowser *textBrowser;
+    QGroupBox *groupBox_4;
+    QProgressBar *progressBar_6;
+    QGroupBox *groupBox_5;
+    QLabel *label_10;
     QWidget *page_2;
     QWidget *page_3;
+    QLineEdit *lineEdit;
+    QLabel *label_11;
+    QLabel *label_12;
+    QLabel *label_13;
+    QDialogButtonBox *buttonBox;
     QWidget *page_4;
     QTabWidget *tabWidget;
     QWidget *tab;
@@ -100,7 +113,23 @@ public:
         page = new QWidget();
         page->setObjectName(QStringLiteral("page"));
         page->setGeometry(QRect(0, 0, 619, 378));
-        toolBox->addItem(page, QString::fromUtf8("\344\273\273\345\212\241\344\270\200\357\274\2323\344\270\252\345\271\266\350\241\214\350\277\233\347\250\213"));
+        textBrowser = new QTextBrowser(page);
+        textBrowser->setObjectName(QStringLiteral("textBrowser"));
+        textBrowser->setGeometry(QRect(10, 0, 241, 371));
+        groupBox_4 = new QGroupBox(page);
+        groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
+        groupBox_4->setGeometry(QRect(260, 0, 351, 181));
+        progressBar_6 = new QProgressBar(groupBox_4);
+        progressBar_6->setObjectName(QStringLiteral("progressBar_6"));
+        progressBar_6->setGeometry(QRect(40, 90, 261, 23));
+        progressBar_6->setValue(24);
+        groupBox_5 = new QGroupBox(page);
+        groupBox_5->setObjectName(QStringLiteral("groupBox_5"));
+        groupBox_5->setGeometry(QRect(259, 190, 351, 181));
+        label_10 = new QLabel(groupBox_5);
+        label_10->setObjectName(QStringLiteral("label_10"));
+        label_10->setGeometry(QRect(50, 70, 251, 41));
+        toolBox->addItem(page, QString::fromUtf8("\344\273\273\345\212\241\344\270\200\357\274\2323\344\270\252\345\271\266\345\217\221\350\277\233\347\250\213"));
         page_2 = new QWidget();
         page_2->setObjectName(QStringLiteral("page_2"));
         page_2->setGeometry(QRect(0, 0, 619, 378));
@@ -108,6 +137,22 @@ public:
         page_3 = new QWidget();
         page_3->setObjectName(QStringLiteral("page_3"));
         page_3->setGeometry(QRect(0, 0, 619, 378));
+        lineEdit = new QLineEdit(page_3);
+        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        lineEdit->setGeometry(QRect(170, 66, 291, 31));
+        label_11 = new QLabel(page_3);
+        label_11->setObjectName(QStringLiteral("label_11"));
+        label_11->setGeometry(QRect(170, 160, 251, 21));
+        label_12 = new QLabel(page_3);
+        label_12->setObjectName(QStringLiteral("label_12"));
+        label_12->setGeometry(QRect(110, 70, 51, 21));
+        label_13 = new QLabel(page_3);
+        label_13->setObjectName(QStringLiteral("label_13"));
+        label_13->setGeometry(QRect(70, 160, 81, 21));
+        buttonBox = new QDialogButtonBox(page_3);
+        buttonBox->setObjectName(QStringLiteral("buttonBox"));
+        buttonBox->setGeometry(QRect(220, 260, 176, 27));
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
         toolBox->addItem(page_3, QString::fromUtf8("\344\273\273\345\212\241\344\270\211\357\274\232\346\267\273\345\212\240\350\256\276\345\244\207\351\251\261\345\212\250"));
         page_4 = new QWidget();
         page_4->setObjectName(QStringLiteral("page_4"));
@@ -234,7 +279,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        toolBox->setCurrentIndex(4);
+        toolBox->setCurrentIndex(2);
         tabWidget->setCurrentIndex(0);
 
 
@@ -244,8 +289,14 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
-        toolBox->setItemText(toolBox->indexOf(page), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\270\200\357\274\2323\344\270\252\345\271\266\350\241\214\350\277\233\347\250\213", 0));
+        groupBox_4->setTitle(QApplication::translate("MainWindow", "CPU\345\210\251\347\224\250\347\216\207", 0));
+        groupBox_5->setTitle(QApplication::translate("MainWindow", "\345\275\223\345\211\215\346\227\266\351\227\264", 0));
+        label_10->setText(QString());
+        toolBox->setItemText(toolBox->indexOf(page), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\270\200\357\274\2323\344\270\252\345\271\266\345\217\221\350\277\233\347\250\213", 0));
         toolBox->setItemText(toolBox->indexOf(page_2), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\272\214\357\274\232\346\267\273\345\212\240\347\263\273\347\273\237\350\260\203\347\224\250", 0));
+        label_11->setText(QApplication::translate("MainWindow", "TextLabel", 0));
+        label_12->setText(QApplication::translate("MainWindow", "\350\276\223\345\205\245\357\274\232", 0));
+        label_13->setText(QApplication::translate("MainWindow", "myDevice\357\274\232", 0));
         toolBox->setItemText(toolBox->indexOf(page_3), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\270\211\357\274\232\346\267\273\345\212\240\350\256\276\345\244\207\351\251\261\345\212\250", 0));
         QTableWidgetItem *___qtablewidgetitem = tableWidget->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("MainWindow", "\350\277\233\347\250\213\345\220\215", 0));
