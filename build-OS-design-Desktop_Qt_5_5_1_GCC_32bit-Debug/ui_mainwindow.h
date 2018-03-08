@@ -18,9 +18,9 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QProgressBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
@@ -49,6 +49,11 @@ public:
     QGroupBox *groupBox_5;
     QLabel *label_10;
     QWidget *page_2;
+    QPushButton *pushButton;
+    QPushButton *pushButton_2;
+    QPushButton *pushButton_3;
+    QProgressBar *progressBar_7;
+    QLabel *label_14;
     QWidget *page_3;
     QLineEdit *lineEdit;
     QLabel *label_11;
@@ -59,7 +64,6 @@ public:
     QTabWidget *tabWidget;
     QWidget *tab;
     QTableWidget *tableWidget;
-    QListWidget *listWidget;
     QWidget *tab_2;
     QGroupBox *groupBox;
     QProgressBar *progressBar;
@@ -82,7 +86,6 @@ public:
     QLabel *label_9;
     QLabel *download;
     QLabel *upload;
-    QWidget *tab_3;
     QWidget *page_5;
     QTreeWidget *treeWidget;
     QTableWidget *tableWidget_2;
@@ -133,6 +136,22 @@ public:
         page_2 = new QWidget();
         page_2->setObjectName(QStringLiteral("page_2"));
         page_2->setGeometry(QRect(0, 0, 619, 378));
+        pushButton = new QPushButton(page_2);
+        pushButton->setObjectName(QStringLiteral("pushButton"));
+        pushButton->setGeometry(QRect(120, 260, 99, 27));
+        pushButton_2 = new QPushButton(page_2);
+        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
+        pushButton_2->setGeometry(QRect(250, 260, 99, 27));
+        pushButton_3 = new QPushButton(page_2);
+        pushButton_3->setObjectName(QStringLiteral("pushButton_3"));
+        pushButton_3->setGeometry(QRect(380, 260, 99, 27));
+        progressBar_7 = new QProgressBar(page_2);
+        progressBar_7->setObjectName(QStringLiteral("progressBar_7"));
+        progressBar_7->setGeometry(QRect(190, 120, 221, 21));
+        progressBar_7->setValue(0);
+        label_14 = new QLabel(page_2);
+        label_14->setObjectName(QStringLiteral("label_14"));
+        label_14->setGeometry(QRect(430, 116, 91, 31));
         toolBox->addItem(page_2, QString::fromUtf8("\344\273\273\345\212\241\344\272\214\357\274\232\346\267\273\345\212\240\347\263\273\347\273\237\350\260\203\347\224\250"));
         page_3 = new QWidget();
         page_3->setObjectName(QStringLiteral("page_3"));
@@ -142,7 +161,7 @@ public:
         lineEdit->setGeometry(QRect(170, 66, 291, 31));
         label_11 = new QLabel(page_3);
         label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(170, 160, 251, 21));
+        label_11->setGeometry(QRect(170, 150, 291, 41));
         label_12 = new QLabel(page_3);
         label_12->setObjectName(QStringLiteral("label_12"));
         label_12->setGeometry(QRect(110, 70, 51, 21));
@@ -163,22 +182,8 @@ public:
         tab = new QWidget();
         tab->setObjectName(QStringLiteral("tab"));
         tableWidget = new QTableWidget(tab);
-        if (tableWidget->columnCount() < 4)
-            tableWidget->setColumnCount(4);
-        QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
-        tableWidget->setHorizontalHeaderItem(0, __qtablewidgetitem);
-        QTableWidgetItem *__qtablewidgetitem1 = new QTableWidgetItem();
-        tableWidget->setHorizontalHeaderItem(1, __qtablewidgetitem1);
-        QTableWidgetItem *__qtablewidgetitem2 = new QTableWidgetItem();
-        tableWidget->setHorizontalHeaderItem(2, __qtablewidgetitem2);
-        QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
-        tableWidget->setHorizontalHeaderItem(3, __qtablewidgetitem3);
         tableWidget->setObjectName(QStringLiteral("tableWidget"));
-        tableWidget->setGeometry(QRect(-10, 0, 631, 31));
-        tableWidget->horizontalHeader()->setDefaultSectionSize(157);
-        listWidget = new QListWidget(tab);
-        listWidget->setObjectName(QStringLiteral("listWidget"));
-        listWidget->setGeometry(QRect(0, 30, 621, 321));
+        tableWidget->setGeometry(QRect(0, 0, 621, 341));
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName(QStringLiteral("tab_2"));
@@ -252,9 +257,6 @@ public:
         upload->setObjectName(QStringLiteral("upload"));
         upload->setGeometry(QRect(410, 80, 111, 17));
         tabWidget->addTab(tab_2, QString());
-        tab_3 = new QWidget();
-        tab_3->setObjectName(QStringLiteral("tab_3"));
-        tabWidget->addTab(tab_3, QString());
         toolBox->addItem(page_4, QString::fromUtf8("\344\273\273\345\212\241\345\233\233\357\274\232\347\263\273\347\273\237\347\233\221\350\247\206\345\231\250"));
         page_5 = new QWidget();
         page_5->setObjectName(QStringLiteral("page_5"));
@@ -279,7 +281,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        toolBox->setCurrentIndex(2);
+        toolBox->setCurrentIndex(3);
         tabWidget->setCurrentIndex(0);
 
 
@@ -288,24 +290,20 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "\346\223\215\344\275\234\347\263\273\347\273\237\350\257\276\347\250\213\350\256\276\350\256\241", 0));
         groupBox_4->setTitle(QApplication::translate("MainWindow", "CPU\345\210\251\347\224\250\347\216\207", 0));
         groupBox_5->setTitle(QApplication::translate("MainWindow", "\345\275\223\345\211\215\346\227\266\351\227\264", 0));
         label_10->setText(QString());
         toolBox->setItemText(toolBox->indexOf(page), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\270\200\357\274\2323\344\270\252\345\271\266\345\217\221\350\277\233\347\250\213", 0));
+        pushButton->setText(QApplication::translate("MainWindow", "\351\200\211\346\213\251\346\272\220\346\226\207\344\273\266", 0));
+        pushButton_2->setText(QApplication::translate("MainWindow", "\351\200\211\346\213\251\347\233\256\346\240\207\346\226\207\344\273\266", 0));
+        pushButton_3->setText(QApplication::translate("MainWindow", "\346\213\267\350\264\235", 0));
+        label_14->setText(QString());
         toolBox->setItemText(toolBox->indexOf(page_2), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\272\214\357\274\232\346\267\273\345\212\240\347\263\273\347\273\237\350\260\203\347\224\250", 0));
-        label_11->setText(QApplication::translate("MainWindow", "TextLabel", 0));
+        label_11->setText(QApplication::translate("MainWindow", "Waiting...", 0));
         label_12->setText(QApplication::translate("MainWindow", "\350\276\223\345\205\245\357\274\232", 0));
         label_13->setText(QApplication::translate("MainWindow", "myDevice\357\274\232", 0));
         toolBox->setItemText(toolBox->indexOf(page_3), QApplication::translate("MainWindow", "\344\273\273\345\212\241\344\270\211\357\274\232\346\267\273\345\212\240\350\256\276\345\244\207\351\251\261\345\212\250", 0));
-        QTableWidgetItem *___qtablewidgetitem = tableWidget->horizontalHeaderItem(0);
-        ___qtablewidgetitem->setText(QApplication::translate("MainWindow", "\350\277\233\347\250\213\345\220\215", 0));
-        QTableWidgetItem *___qtablewidgetitem1 = tableWidget->horizontalHeaderItem(1);
-        ___qtablewidgetitem1->setText(QApplication::translate("MainWindow", "ID", 0));
-        QTableWidgetItem *___qtablewidgetitem2 = tableWidget->horizontalHeaderItem(2);
-        ___qtablewidgetitem2->setText(QApplication::translate("MainWindow", "\347\224\250\346\210\267", 0));
-        QTableWidgetItem *___qtablewidgetitem3 = tableWidget->horizontalHeaderItem(3);
-        ___qtablewidgetitem3->setText(QApplication::translate("MainWindow", "% CPU", 0));
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("MainWindow", "\350\277\233\347\250\213", 0));
         groupBox->setTitle(QApplication::translate("MainWindow", "CPU\345\210\251\347\224\250\347\216\207", 0));
         label->setText(QApplication::translate("MainWindow", "CPU0", 0));
@@ -324,7 +322,6 @@ public:
         download->setText(QApplication::translate("MainWindow", "0\345\255\227\350\212\202", 0));
         upload->setText(QApplication::translate("MainWindow", "0\345\255\227\350\212\202", 0));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "\350\265\204\346\272\220", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "\346\226\207\344\273\266\347\263\273\347\273\237", 0));
         toolBox->setItemText(toolBox->indexOf(page_4), QApplication::translate("MainWindow", "\344\273\273\345\212\241\345\233\233\357\274\232\347\263\273\347\273\237\347\233\221\350\247\206\345\231\250", 0));
         QTreeWidgetItem *___qtreewidgetitem = treeWidget->headerItem();
         ___qtreewidgetitem->setText(0, QApplication::translate("MainWindow", "\346\226\207\344\273\266\346\240\221", 0));

@@ -86,7 +86,11 @@ int FileSystem::getBlock(int blockSize)
             if(counter==blockSize)
             {
                 for(int j=start;j<start+blockSize;++j)
+                {
                     bitmapStartAddr[j-1]='1';
+                    memset(getBlockAddr(j),0,512);
+                }
+                //qDebug()<<start;
                 return start;
             }
         }
@@ -98,13 +102,13 @@ int FileSystem::getBlock(int blockSize)
 //
 char* FileSystem::getBlockAddr(int blockNum)
 {
-    return blockStartAddr+blockNum*block_size;
+    return blockStartAddr+(blockNum-1)*block_size;
 }
 
 //
 int FileSystem::getAddrBlock(char* addr)
 {
-    return (addr-blockStartAddr)/block_size;
+    return (addr-blockStartAddr)/block_size+1;
 }
 
 //
@@ -113,8 +117,8 @@ int FileSystem::releaseBlock(int blockNum, int blockSize)
     int endBlock = blockNum+blockSize;
     for(int i=blockNum;i<endBlock;++i)
     {
-        bitmapStartAddr[i]='0';
-        memset(getBlockAddr(i), 0, 512);
+        bitmapStartAddr[i-1]='0';
+        //memset(getBlockAddr(i), 0, 512);
     }
     return 0;
 }
@@ -124,7 +128,7 @@ int FileSystem::createFile(const char *fileName)
     iNode& inode=iTbl.i[iTbl.num++];
     inode.i_uid=0;
     inode.i_type=File;
-    strcpy(inode.i_mode, "rwxr--r--");
+    strcpy(inode.i_mode, "rwxr-xr-x");
     inode.i_ilink=1;
     inode.i_size=0;
     inode.i_addr[0]=getBlock(1);
@@ -214,7 +218,7 @@ int FileSystem::createDir(char *dirName)
     iNode& inode=iTbl.i[iTbl.num++];
     inode.i_uid=0;
     inode.i_type=Dir;
-    strcpy(inode.i_mode, "rwxr--r--");
+    strcpy(inode.i_mode, "rwxr-xr-x");
     inode.i_ilink=1;
     inode.i_size=0;
     inode.i_addr[0]=getBlock(1);
@@ -237,6 +241,7 @@ int FileSystem::createDir(char *dirName)
 
 int FileSystem::changeDir(const char *dirName)
 {
+    qDebug()<<dirName;
     const char* p=dirName;
     const char* p1;
     if(strcmp(dirName,".")==0)
@@ -258,8 +263,8 @@ int FileSystem::changeDir(const char *dirName)
     }
     else
     {
-        if(dirName[1]=='\0')
-            return 0;
+//        if(strcmp(dirName,".")==0)
+//            return 0;
         if(strncmp(dirName,"./", 2)==0)
             p+=2;
 LABEL1:
@@ -301,14 +306,23 @@ void FileSystem::pwd()
     qDebug()<<pathStr;
 }
 
-int FileSystem::changeName(const char *oldName, const char *newName)
+int FileSystem::rename(const char *oldName, const char *newName)
 {
-
-}
-
-void FileSystem::list()
-{
-
+    for(int i=0;i<8;++i)
+    {
+        dirEntry* pe=(dirEntry*)getBlockAddr(curDir->i_addr[i]);
+        for(int j=0;j<32;++j)
+        {
+            if(pe->inode_num==0)
+                return -1;
+            if(strcmp(pe->fileName,oldName)==0)
+            {
+                strcpy(pe->fileName,newName);
+                return 0;
+            }
+            pe++;
+        }
+    }
 }
 
 int FileSystem::open(char *fileName)
@@ -339,12 +353,13 @@ Found:
         for(int i=0;i<8;++i)
         {
             if(left==0)
+            {
                 break;
+            }
             if(left>=512)
             {
                 char* s=getBlockAddr(inode->i_addr[i]);
                 strncpy(buf,getBlockAddr(inode->i_addr[i]), 512);
-                buf[512]='\0';
                 hedit->setTextEdit(buf);
                 left-=512;
             }
@@ -352,8 +367,8 @@ Found:
             {
                 char* s=getBlockAddr(inode->i_addr[i]);
                 strncpy(buf,getBlockAddr(inode->i_addr[i]), left);
-                buf[left]='\0';
                 hedit->setTextEdit(buf);
+                buf[left]='\0';
                 left=0;
             }
         }
@@ -392,7 +407,45 @@ Found:
     return 0;
 }
 
-int FileSystem::close(char *fileName)
+int FileSystem::move(const char *fileName, const char *path)
 {
-
+    iNode* inode;
+    dirEntry *pe, *pl, *p;
+    for(int i=0;i<8;++i)
+    {
+        p=(dirEntry*)getBlockAddr(curDir->i_addr[i]);
+        for(int j=0;j<32;++j)
+        {
+            if(p->inode_num==0)
+            {
+                pl=p-1;
+                goto Label1;
+            }
+            if(strcmp(p->fileName,fileName)==0)
+            {
+                pe=p;
+            }
+            p++;
+        }
+    }
+Label1:
+    int i_num=pe->inode_num;
+    pe->inode_num=pl->inode_num;
+    strcpy(pe->fileName, pl->fileName);
+    pl->inode_num=0;
+    changeDir(path);
+    for(int i=0;i<8;++i)
+    {
+        dirEntry* pe=(dirEntry*)getBlockAddr(curDir->i_addr[i]);
+        for(int j=0;j<32;++j)
+        {
+            if(pe->inode_num==0)
+            {
+                strcpy(pe->fileName, fileName);
+                pe->inode_num=i_num;
+                return 0;
+            }
+            pe++;
+        }
+    }
 }

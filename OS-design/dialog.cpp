@@ -1,21 +1,13 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
-Dialog::Dialog(int type, QString prompt, QWidget *parent) :
+Dialog::Dialog(QString windowText, QString prompt, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog)
 {
     ui->setupUi(this);
-    if(type==0)
-    {
-        setWindowTitle("新建文件夹");
-        ui->label->setText(prompt);
-    }
-    else
-    {
-        setWindowTitle("新建文件");
-        ui->label->setText(prompt);
-    }
+    setWindowTitle(windowText);
+    ui->label->setText(prompt);
 }
 
 Dialog::~Dialog()

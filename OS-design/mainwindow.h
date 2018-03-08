@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QProcess>
 #include <QTextCodec>
+#include <QFileDialog>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -46,6 +47,8 @@ public slots:
     void newFile_table();
     void tableDoubleClickedSlots(QModelIndex index);
     void deleteFile();
+    void rename();
+    void move();
 
 private slots:
     void on_buttonBox_accepted();
@@ -53,6 +56,12 @@ private slots:
     void on_buttonBox_rejected();
 
     void on_lineEdit_textChanged(const QString &arg1);
+
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -63,10 +72,10 @@ private:
     QMenu* menu;
     QMenu* table_menu;
     Dialog* dialog;
-    QString file_name;
+    QString file_name, source, dest;
     void buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* parent);
     void showCurDir();
-    void showFile(QString& fileName, short uid, short type, long size);
+    void showFile(QString& fileName, short uid, QString mode, short type, long size);
 };
 
 #endif // MAINWINDOW_H

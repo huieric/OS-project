@@ -71,10 +71,9 @@ public:
     int removeInode(iNode* inode);
     int createDir(char *dirName);
     int changeDir(const char *dirName);
-    int changeName(const char *oldName, const char *newName);
-    void list();
+    int rename(const char *oldName, const char *newName);
+    int move(const char*fileName, const char*path);
     int open(char *fileName);
-    int close(char *fileName);
     void pwd();
 };
 

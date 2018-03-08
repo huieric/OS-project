@@ -9,17 +9,21 @@ MainWindow::MainWindow(QWidget *parent) :
     dialog(0)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags()&~Qt::WindowMaximizeButtonHint);    // 禁止最大化按钮
+    setFixedSize(this->width(),this->height());                     // 禁止拖动窗口大小
+    ui->label_14->setText("Waiting...");
     ui->progressBar->setRange(0,100);
     ui->progressBar_2->setRange(0,100);
     ui->progressBar_3->setRange(0,100);
-    ui->progressBar_4->setRange(0,100);
+    ui->progressBar_4->setRange(0,100);    
+    //ui->treeWidget->setItemsExpandable(false);
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, &MainWindow::showMenu);
     ui->tableWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableWidget_2, &QTableWidget::customContextMenuRequested, this, &MainWindow::showTableMenu);
     connect(ui->tableWidget_2, &QTableWidget::doubleClicked, this, &MainWindow::tableDoubleClickedSlots);
 
-    QTableWidget& tablewidget=*ui->tableWidget_2;
+    QTableWidget& tablewidget=*ui->tableWidget;
     tablewidget.setColumnCount(4);
     //tablewidget.horizontalHeader()->setDefaultSectionSize(150);
 //    QFont font=tablewidget.horizontalHeader()->font();
@@ -36,8 +40,36 @@ MainWindow::MainWindow(QWidget *parent) :
     tablewidget.setStyleSheet("selection-background-color:lightblue;");
     //tablewidget.setItemDelegate(new NoFocusDelegate());
     QStringList header;
-    header<<QString("名称")<<QString("用户")<<QString("类型")<<QString("大小");
+    header<<QString("进程名")<<QString("ID")<<QString("用户")<<QString("%CPU");
+    ui->tableWidget->setHorizontalHeaderLabels(header);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+
+    QTableWidget& tablewidget2=*ui->tableWidget_2;
+    tablewidget2.setColumnCount(5);
+    //tablewidget2.horizontalHeader()->setDefaultSectionSize(150);
+//    QFont font=tablewidget2.horizontalHeader()->font();
+//    font.setBold(true);
+//    tablewidget2.horizontalHeader()->setFont(font);
+    tablewidget2.horizontalHeader()->setStretchLastSection(true);
+    tablewidget2.verticalHeader()->setDefaultSectionSize(25);
+    //tablewidget2.setFrameShape(QFrame::NoFrame);
+    tablewidget2.setShowGrid(false);
+    tablewidget2.verticalHeader()->setVisible(false);
+    tablewidget2.setSelectionMode(QAbstractItemView::ExtendedSelection);
+    tablewidget2.setSelectionBehavior(QAbstractItemView::SelectRows);
+    tablewidget2.setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tablewidget2.setStyleSheet("selection-background-color:lightblue;");
+    //tablewidget2.setItemDelegate(new NoFocusDelegate());
+    header.clear();
+    header<<QString("名称")<<QString("用户")<<QString("权限")<<QString("类型")<<QString("大小");
     ui->tableWidget_2->setHorizontalHeaderLabels(header);
+    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
 
     monitor = new WorkerThread_monitor;
     connect(monitor, &WorkerThread_monitor::resultReady, this, &MainWindow::showProcess);
@@ -100,12 +132,40 @@ void MainWindow::readTime()
 
 void MainWindow::showProcess(int p_num)
 {
-    ui->listWidget->clear();
-    for(int i = 0; i < p_num; ++i)
+//    ui->listWidget->clear();
+//    for(int i = 0; i < p_num; ++i)
+//    {
+//        char state[256];
+//        sprintf(state, "%-40s%-40d%-40s%-30.2lf", monitor->ps[i].command, monitor->ps[i].pid, monitor->ps[i].u_name, monitor->ps[i].cpu_usage);
+//        ui->listWidget->addItem(QString(state));
+//    }
+    QTableWidget* tablewidget=ui->tableWidget;
+    for(int i=tablewidget->rowCount()-1;i>=0;--i)
+        tablewidget->removeRow(i);
+    for(int i=0;i<p_num;++i)
     {
-        char state[256];
-        sprintf(state, "%-40s%-40d%-40s%-30.2lf", monitor->ps[i].command, monitor->ps[i].pid, monitor->ps[i].u_name, monitor->ps[i].cpu_usage);
-        ui->listWidget->addItem(QString(state));
+        int row_count=tablewidget->rowCount();
+        tablewidget->insertRow(row_count);
+        QTableWidgetItem* item=new QTableWidgetItem();
+        QTableWidgetItem* item1=new QTableWidgetItem();
+        QTableWidgetItem* item2=new QTableWidgetItem();
+        QTableWidgetItem* item3=new QTableWidgetItem();
+        item->setText(monitor->ps[i].command);
+        item1->setText(QString::number(monitor->ps[i].pid));
+        item2->setText(monitor->ps[i].u_name);
+        item3->setText(QString::number(monitor->ps[i].cpu_usage,'f',2));
+        tablewidget->setItem(row_count,0,item);
+        tablewidget->setItem(row_count,1,item1);
+        tablewidget->setItem(row_count,2,item2);
+        tablewidget->setItem(row_count,3,item3);
+//        item->setTextAlignment(Qt::AlignCenter);
+//        item1->setTextAlignment(Qt::AlignCenter);
+//        item2->setTextAlignment(Qt::AlignCenter);
+//        item3->setTextAlignment(Qt::AlignCenter);
+//        QColor color("gray");
+//        item1->setTextColor(color);
+//        item2->setTextColor(color);
+//        item3->setTextColor(color);
     }
 
     QString memLabel = QString::number((monitor->ms.memtotal-monitor->ms.memfree)/(1024*1024), 'f', 1)+"GB, 共"+QString::number(monitor->ms.memtotal/(1024*1024), 'f', 1)+"GB";
@@ -213,15 +273,17 @@ void MainWindow::buildTree(iNode* curDir, char* fileName, QTreeWidgetItem* paren
             }
         }
     }
+    ui->treeWidget->expandAll();
 }
 
 void MainWindow::showCurDir()
 {
+    fs->pwd();
     iNode* curDir=fs->curDir;
     for(int i=ui->tableWidget_2->rowCount()-1;i>=0;--i)
         ui->tableWidget_2->removeRow(i);
     QString fileName=" . .";
-    showFile(fileName,0,-1,0);
+    showFile(fileName,0,"",-1,0);
     for(int i=0;i<8;++i)
     {
         int blockNum=curDir->i_addr[i];
@@ -235,7 +297,7 @@ void MainWindow::showCurDir()
                 if(inode_num>0)
                 {
                     iNode* inode=&fs->iTbl.i[inode_num];
-                    showFile(fileName, inode->i_uid, inode->i_type, inode->i_size);
+                    showFile(fileName, inode->i_uid, inode->i_mode, inode->i_type, inode->i_size);
                     pe++;
                 }
                 else
@@ -245,7 +307,7 @@ void MainWindow::showCurDir()
     }
 }
 
-void MainWindow::showFile(QString& fileName, short uid, short type, long size)
+void MainWindow::showFile(QString& fileName, short uid, QString mode, short type, long size)
 {
     QTableWidget* tablewidget=ui->tableWidget_2;
     int row_count=tablewidget->rowCount();
@@ -262,25 +324,30 @@ void MainWindow::showFile(QString& fileName, short uid, short type, long size)
     QTableWidgetItem* item1=new QTableWidgetItem();
     QTableWidgetItem* item2=new QTableWidgetItem();
     QTableWidgetItem* item3=new QTableWidgetItem();
+    QTableWidgetItem* item4=new QTableWidgetItem();
     item->setText(fileName);
-    item1->setText(QString::number(uid));
+    item1->setText("huieric");
+    item2->setText(mode);
     if(type==Dir)
-        item2->setText(QString("文件夹"));
+        item3->setText(QString("文件夹"));
     else
-        item2->setText(QString("文档"));
-    item3->setText(QString::number(size)+"B");
+        item3->setText(QString("文档"));
+    item4->setText(QString::number(size)+"B");
     tablewidget->setItem(row_count,0,item);
     tablewidget->setItem(row_count,1,item1);
     tablewidget->setItem(row_count,2,item2);
     tablewidget->setItem(row_count,3,item3);
+    tablewidget->setItem(row_count,4,item4);
     item->setTextAlignment(Qt::AlignCenter);
     item1->setTextAlignment(Qt::AlignCenter);
     item2->setTextAlignment(Qt::AlignCenter);
     item3->setTextAlignment(Qt::AlignCenter);
+    item4->setTextAlignment(Qt::AlignCenter);
     QColor color("gray");
     item1->setTextColor(color);
     item2->setTextColor(color);
     item3->setTextColor(color);
+    item4->setTextColor(color);
 }
 
 void MainWindow::showMenu(const QPoint& pos)
@@ -308,12 +375,16 @@ void MainWindow::showTableMenu(const QPoint &pos)
     table_menu=new QMenu(ui->tableWidget_2);
     QAction* action_create_folder=new QAction(ui->tableWidget_2);
     QAction* action_create_file=new QAction(ui->tableWidget_2);
-    //QAction* action_rename=new QAction(ui->tableWidget_2);
+    QAction* action_rename=new QAction(ui->tableWidget_2);
     QAction* action_delete=new QAction(ui->tableWidget_2);
+    QAction* action_move=new QAction(ui->tableWidget_2);
     action_create_folder->setText("新建文件夹");
     action_create_file->setText("新建文件");
-    //action_rename->setText("删除");
+    action_rename->setText("重命名");
     action_delete->setText("删除");
+    action_move->setText("移动到 ...");
+    connect(action_move, &QAction::triggered, this, &MainWindow::move);
+    connect(action_rename, &QAction::triggered, this, &MainWindow::rename);
     connect(action_delete, &QAction::triggered, this, &MainWindow::deleteFile);
     connect(action_create_folder, &QAction::triggered, this, &MainWindow::newDir_table);
     connect(action_create_file, &QAction::triggered, this, &MainWindow::newFile_table);
@@ -321,7 +392,8 @@ void MainWindow::showTableMenu(const QPoint &pos)
     if(item!=0)
     {
         table_menu->addAction(action_delete);
-        //table_menu->addAction(action_rename);
+        table_menu->addAction(action_rename);
+        table_menu->addAction(action_move);
         file_name=ui->tableWidget_2->item(item->row(), 0)->text();
     }
     else
@@ -330,6 +402,28 @@ void MainWindow::showTableMenu(const QPoint &pos)
         table_menu->addAction(action_create_file);        
     }
     table_menu->exec(QCursor::pos());
+}
+
+void MainWindow::move()
+{
+    dialog=new Dialog("移动到...", "请输入路径：");
+    if(dialog->exec()==QDialog::Accepted && fs->move(file_name.toLatin1().data(), dialog->name)==0)
+    {
+        free(dialog->name);
+        buildTree(fs->rootDir, "/", 0);
+        showCurDir();
+    }
+}
+
+void MainWindow::rename()
+{
+    dialog=new Dialog("重命名", "请输入新名字：");
+    if(dialog->exec()==QDialog::Accepted && fs->rename(file_name.toLatin1().data(), dialog->name)==0)
+    {
+        free(dialog->name);
+        buildTree(fs->rootDir, "/", 0);
+        showCurDir();
+    }
 }
 
 void MainWindow::deleteFile()
@@ -344,7 +438,7 @@ void MainWindow::deleteFile()
 
 void MainWindow::newDir_table()
 {
-    dialog=new Dialog(0, "请输入文件夹名：");
+    dialog=new Dialog("新建文件夹", "请输入文件夹名：");
     if(dialog->exec()==QDialog::Accepted && fs->createDir(dialog->name)==0)
     {
         free(dialog->name);
@@ -355,7 +449,7 @@ void MainWindow::newDir_table()
 
 void MainWindow::newFile_table()
 {
-    dialog=new Dialog(1, "请输入文件名：");
+    dialog=new Dialog("新建文件", "请输入文件名：");
     if(dialog->exec()==QDialog::Accepted && fs->createFile(dialog->name)==0)
     {
         free(dialog->name);
@@ -366,12 +460,12 @@ void MainWindow::newFile_table()
 
 void MainWindow::newDir()
 {
-    dialog=new Dialog(0, "请输入路径：");
+    dialog=new Dialog("新建文件夹", "请输入路径：");
     if(dialog->exec()==QDialog::Accepted && fs->changeDir(dialog->name)==0)
     {        
         free(dialog->name);
         delete dialog;
-        dialog=new Dialog(0, "请输入文件夹名：");
+        dialog=new Dialog("新建文件夹", "请输入文件夹名：");
         if(dialog->exec()==QDialog::Accepted && fs->createDir(dialog->name)==0)
         {
             free(dialog->name);
@@ -383,12 +477,12 @@ void MainWindow::newDir()
 
 void MainWindow::newFile()
 {
-    dialog=new Dialog(1, "请输入路径：");
+    dialog=new Dialog("新建文件", "请输入路径：");
     if(dialog->exec()==QDialog::Accepted && fs->changeDir(dialog->name)==0)
     {
         free(dialog->name);
         delete dialog;
-        dialog=new Dialog(1, "请输入文件名：");
+        dialog=new Dialog("新建文件", "请输入文件名：");
         if(dialog->exec()==QDialog::Accepted && fs->createFile(dialog->name)==0)
         {
             free(dialog->name);
@@ -402,6 +496,7 @@ void MainWindow::tableDoubleClickedSlots(QModelIndex index)
 {
     int row=index.row();
     QString file_name=ui->tableWidget_2->item(row, 0)->text();
+//    qDebug()<<file_name;
     char* fileName=file_name.toLatin1().data();
     if(strcmp(fileName," . .")==0 && fs->curDir==fs->rootDir)
     {
@@ -426,7 +521,7 @@ void MainWindow::tableDoubleClickedSlots(QModelIndex index)
                     if(fs->changeDir(fileName)==0)
                     {
                         showCurDir();
-                        fs->pwd();
+//                        fs->pwd();
                     }
                 }
                 else
@@ -443,50 +538,50 @@ void MainWindow::tableDoubleClickedSlots(QModelIndex index)
 
 void MainWindow::on_buttonBox_accepted()
 {
-    QStringList options;
-    QProcess* p=new QProcess;
-    options << "-c" << "insmod /home/huieric/Document/OS-project/Step3/myDrive.ko";
-    p->start("/bin/bash",options);
-    p->waitForFinished();
-    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
-    options.clear();
-    options << "-c" << "cat /proc/devices | grep myDevice";
-    p->start("/bin/bash",options);
-    p->waitForFinished();
-    char temp[10];
-    char* dev_mesg=p->readAll().data();
-    qDebug() << dev_mesg;
-    char* pt=strchr(dev_mesg, ' ');
-    strncpy(temp, dev_mesg, pt-dev_mesg);
-    temp[pt-dev_mesg]='\0';
-    qDebug() << temp;
-    options.clear();
-    options << "-c" << QString("mknod /dev/myDevice c ")+temp+" 0";
-    p->start("/bin/bash",options);
-    p->waitForFinished();
-    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+//    QStringList options;
+//    QProcess* p=new QProcess;
+//    options << "-c" << "insmod /home/huieric/Document/OS-project/Step3/myDrive.ko";
+//    p->start("/bin/bash",options);
+//    p->waitForFinished();
+//    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+//    options.clear();
+//    options << "-c" << "cat /proc/devices | grep myDevice";
+//    p->start("/bin/bash",options);
+//    p->waitForFinished();
+//    char temp[10];
+//    char* dev_mesg=p->readAll().data();
+//    qDebug() << dev_mesg;
+//    char* pt=strchr(dev_mesg, ' ');
+//    strncpy(temp, dev_mesg, pt-dev_mesg);
+//    temp[pt-dev_mesg]='\0';
+//    qDebug() << temp;
+//    options.clear();
+//    options << "-c" << QString("mknod /dev/myDevice c ")+temp+" 0";
+//    p->start("/bin/bash",options);
+//    p->waitForFinished();
+//    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
 }
 
 void MainWindow::on_buttonBox_rejected()
 {
-    QStringList options;
-    QProcess* p=new QProcess;
-    options << "-c" << "rmmod /home/huieric/Document/OS-project/Step3/myDrive.ko";
-    p->start("/bin/bash",options);
-    p->waitForFinished();
-    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
+//    QStringList options;
+//    QProcess* p=new QProcess;
+//    options << "-c" << "rmmod myDrive";
+//    p->start("/bin/bash",options);
+//    p->waitForFinished();
+//    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
 }
 
 void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 {
     qDebug() << arg1;
-    char buf[MAX_SIZE];
-    char* in;
-    int fd = open("/dev/myDevice", O_RDWR | O_NONBLOCK);
-    if(fd != -1)
-    {
-        read(fd, buf, sizeof(buf));
-        ui->label_11->setText(buf);
+//    char buf[MAX_SIZE];
+//    char* in;
+//    int fd = open("/dev/myDevice", O_RDWR | O_NONBLOCK);
+//    if(fd != -1)
+//    {
+//        read(fd, buf, sizeof(buf));
+//        ui->label_11->setText(buf);
 
 //        in=arg1.toLatin1().data();
 //        write(fd, in, sizeof(in));
@@ -494,10 +589,35 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 //        read(fd, buf, sizeof(buf));
 //        ui->label_11->setText(buf);
 
-       //close(fd);
-    }
-    else
-    {
-        ui->label_11->setText("Open myDevice failed!\n");
-    }
+//       //close(fd);
+//    }
+//    else
+//    {
+//        ui->label_11->setText("Open myDevice failed!\n");
+//    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    source = QFileDialog::getOpenFileName(0,"选择源文件","/home/huieric");
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    dest = QFileDialog::getSaveFileName(0,"选择目标文件","/home/huieric");
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    qDebug() << source << dest;
+    QStringList options;
+    QProcess* p=new QProcess;
+    options << "-c" << QString("./test_syscopy")+" "+source+ " "+dest;
+    ui->progressBar_7->setRange(0,0);
+    p->start("/bin/bash",options);
+    ui->label_14->setText("Copying...");
+    p->waitForFinished();
+    ui->progressBar_7->setRange(0,100);
+    ui->label_14->setText("done!");
+    qDebug() << QTextCodec::codecForLocale()->toUnicode(p->readAllStandardError());
 }
